@@ -18,10 +18,9 @@ package pgpwordlist
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"fmt"
 	"strings"
-
-	"github.com/btcsuite/btcd/wire"
 )
 
 // ToString converts a byteslice to a string of words from the
@@ -62,7 +61,7 @@ func ToStringChecksum(b []byte) (string, error) {
 		return "", err
 	}
 
-	hash := wire.DoubleSha256(b)
+	hash := DoubleSha256(b)
 
 	toUse := uint16(0)
 	toUse = uint16(uint8(hash[0])) * 2
@@ -113,7 +112,7 @@ func ToBytesChecksum(s string) ([]byte, error) {
 	}
 	bdata := b[:len(b)-1]
 
-	hash := wire.DoubleSha256(bdata)
+	hash := DoubleSha256(bdata)
 	toUse := uint16(0)
 	toUse = uint16(uint8(hash[0])) * 2
 	// Odd numbered byte for last char.
@@ -131,4 +130,10 @@ func ToBytesChecksum(s string) ([]byte, error) {
 	}
 
 	return bdata, nil
+}
+
+func DoubleSha256(data []byte) []byte {
+	h := sha256.Sum256(data)
+	h2 := sha256.Sum256(h[:])
+	return h2[:]
 }
